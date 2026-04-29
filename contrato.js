@@ -68,7 +68,6 @@ function confirmarContrato(){
   var obsContr=document.getElementById('contrObs').value.trim();
   var dataInicio=document.getElementById('contrDataInicio').value||'';
   var dataEntrega=document.getElementById('contrDataEntrega').value||'';
-  var regFin=document.getElementById('contrFinChk').classList.contains('on');
   var vista=q.vista||0;
   var pgConds=[];
   var entPct=50,entgPct=50;
@@ -85,7 +84,7 @@ function confirmarContrato(){
   if(dataInicio){var di=new Date(dataInicio+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});pgConds.push({icon:'🔨',txt:'<strong>Início:</strong> '+di});}
   if(dataEntrega){var de=new Date(dataEntrega+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});pgConds.push({icon:'🚚',txt:'<strong>Previsão de entrega:</strong> '+de+' ('+prazo+' dias úteis)'});}
   if(obsContr)pgConds.push({icon:'📝',txt:obsContr});
-  if(regFin&&entVal>0){
+  if(entVal>0){
     if(!DB.j)DB.j=[];
     if(!DB.t)DB.t=[];
     var _td=(q.tipo||'Serviço')+(q.mat?' · '+q.mat:'');

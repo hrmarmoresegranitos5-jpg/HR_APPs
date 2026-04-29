@@ -96,8 +96,6 @@ function buildOrcList(list) {
     h += '<button class="btn btn-contrato" data-cid="'+q.id+'" onclick="gerarContrId(this,event)">📜 Contrato</button>';
     if(q.status==='fechado'){
       h += '<span style="font-size:.7rem;color:#4caf70;font-weight:700;padding:9px 8px;border:1px solid #1a5030;border-radius:10px;background:rgba(76,175,112,.08);white-space:nowrap;">✔ Fechado</span>';
-    }else{
-      h += '<button class="btn" onclick="fecharServico(\''+q.id+'\',event)" style="background:linear-gradient(135deg,#071a0f,#0a2515);color:#4caf70;border:1px solid #1a5030;font-size:.78rem;font-weight:700;padding:9px 13px;border-radius:10px;cursor:pointer;font-family:Outfit,sans-serif;white-space:nowrap;">✅ Fechar</button>';
     }
     h += '<button class="btn btn-red" onclick="orcDel(\''+q.id+'\',event)">🗑</button>';
     h += '</div>';

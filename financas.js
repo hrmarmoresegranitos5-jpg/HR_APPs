@@ -23,20 +23,28 @@ function saveTrEdit(){
   DB.sv();renderFin();closeAll();toast('✓ Atualizado!');
 }
 function delTr(){if(!confirm('Excluir lançamento?'))return;DB.t=DB.t.filter(function(x){return x.id!=editTrId;});DB.sv();renderFin();closeAll();toast('✓ Excluído!');}
+
+function _mesAtual(){return new Date().toISOString().slice(0,7);}
+function _mesLabel(ym){if(!ym)return'';var p=ym.split('-');var ms=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return(ms[+p[1]-1]||p[1])+'/'+p[0].slice(2);}
+
 function renderFin(){
   if(!DB.t)DB.t=[];if(!DB.j)DB.j=[];
+  var mesAtual=_mesAtual();
   var inT=DB.t.filter(function(t){return t.type==='in';}).reduce(function(s,t){return s+(t.value||0);},0);
   var outT=DB.t.filter(function(t){return t.type==='out';}).reduce(function(s,t){return s+(t.value||0);},0);
   var pendT=DB.t.filter(function(t){return t.type==='pend';}).reduce(function(s,t){return s+(t.value||0);},0);
+  var inMes=DB.t.filter(function(t){return t.type==='in'&&(t.date||'').slice(0,7)===mesAtual;}).reduce(function(s,t){return s+(t.value||0);},0);
+  var outMes=DB.t.filter(function(t){return t.type==='out'&&(t.date||'').slice(0,7)===mesAtual;}).reduce(function(s,t){return s+(t.value||0);},0);
   var bal=inT-outT;
+  var balMes=inMes-outMes;
+  var totalContratos=(DB.q||[]).filter(function(q){return q.status==='fechado';}).length;
+  var ticketMedio=totalContratos>0?inT/totalContratos:0;
 
-  // — Saldo hero —
+  // — Hero saldo —
   var fs=document.getElementById('finSaldo');
   if(fs){fs.textContent='R$ '+fm(bal);fs.className='finval '+(bal>=0?'pos':'neg');}
   var fsub=document.getElementById('finSub');
   if(fsub)fsub.textContent=pendT>0?'R$ '+fm(pendT)+' ainda a receber':'Tudo em dia ✔';
-
-  // — Badges hero —
   var fb=document.getElementById('finBadges');
   if(fb){
     var bh='';
@@ -46,28 +54,53 @@ function renderFin(){
     fb.innerHTML=bh;
   }
 
-  // — Cards resumo —
+  // — Cards resumo 3 colunas —
   var fc=document.getElementById('finCards');
   if(fc){fc.innerHTML=
     '<div style="background:linear-gradient(135deg,rgba(58,158,106,.16),rgba(58,158,106,.04));border:1px solid rgba(76,218,128,.28);border-radius:13px;padding:11px 8px;text-align:center;">'
-      +'<div style="font-size:.48rem;letter-spacing:1.8px;text-transform:uppercase;color:rgba(76,218,128,.55);margin-bottom:4px;">Entradas</div>'
+      +'<div style="font-size:.45rem;letter-spacing:1.8px;text-transform:uppercase;color:rgba(76,218,128,.55);margin-bottom:4px;">Entradas</div>'
       +'<div style="font-size:.88rem;font-weight:900;color:#4cda80;font-family:\'Cormorant Garamond\',serif;">R$ '+fm(inT)+'</div>'
     +'</div>'
     +'<div style="background:linear-gradient(135deg,rgba(201,68,68,.13),rgba(201,68,68,.03));border:1px solid rgba(224,112,112,.26);border-radius:13px;padding:11px 8px;text-align:center;">'
-      +'<div style="font-size:.48rem;letter-spacing:1.8px;text-transform:uppercase;color:rgba(224,112,112,.55);margin-bottom:4px;">Saídas</div>'
+      +'<div style="font-size:.45rem;letter-spacing:1.8px;text-transform:uppercase;color:rgba(224,112,112,.55);margin-bottom:4px;">Saídas</div>'
       +'<div style="font-size:.88rem;font-weight:900;color:#e07070;font-family:\'Cormorant Garamond\',serif;">R$ '+fm(outT)+'</div>'
     +'</div>'
     +'<div style="background:linear-gradient(135deg,rgba(74,128,181,.13),rgba(74,128,181,.03));border:1px solid rgba(122,176,222,.26);border-radius:13px;padding:11px 8px;text-align:center;">'
-      +'<div style="font-size:.48rem;letter-spacing:1.8px;text-transform:uppercase;color:rgba(122,176,222,.55);margin-bottom:4px;">A Receber</div>'
+      +'<div style="font-size:.45rem;letter-spacing:1.8px;text-transform:uppercase;color:rgba(122,176,222,.55);margin-bottom:4px;">A Receber</div>'
       +'<div style="font-size:.88rem;font-weight:900;color:#7ab0de;font-family:\'Cormorant Garamond\',serif;">R$ '+fm(pendT)+'</div>'
     +'</div>';
   }
 
-  // — Painel Serviços dos Clientes —
+  // — Painel de métricas do mês —
+  var fmet=document.getElementById('finMetricas');
+  if(fmet){
+    var metH='';
+    // linha 1: este mês
+    metH+='<div style="background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.02));border:1px solid rgba(201,168,76,.2);border-radius:14px;padding:13px 15px;margin-bottom:10px;">';
+    metH+='<div style="font-size:.5rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);font-weight:700;margin-bottom:10px;">📅 Este mês — '+_mesLabel(mesAtual)+'</div>';
+    metH+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">';
+    metH+='<div style="text-align:center;"><div style="font-size:.48rem;color:rgba(76,218,128,.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Receita</div><div style="font-size:.82rem;font-weight:800;color:#4cda80;">R$ '+fm(inMes)+'</div></div>';
+    metH+='<div style="text-align:center;"><div style="font-size:.48rem;color:rgba(224,112,112,.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Gastos</div><div style="font-size:.82rem;font-weight:800;color:#e07070;">R$ '+fm(outMes)+'</div></div>';
+    metH+='<div style="text-align:center;"><div style="font-size:.48rem;color:'+(balMes>=0?'rgba(76,218,128,.6)':'rgba(224,112,112,.6)')+';letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;">Líquido</div><div style="font-size:.82rem;font-weight:800;color:'+(balMes>=0?'#4cda80':'#e07070')+';">R$ '+fm(Math.abs(balMes))+'</div></div>';
+    metH+='</div></div>';
+    // linha 2: indicadores gerais
+    metH+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px;">';
+    metH+='<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center;">';
+    metH+='<div style="font-size:1.4rem;font-weight:900;color:var(--gold2);font-family:\'Cormorant Garamond\',serif;">'+totalContratos+'</div>';
+    metH+='<div style="font-size:.52rem;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-top:2px;">Contratos fechados</div>';
+    metH+='</div>';
+    metH+='<div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:12px;text-align:center;">';
+    metH+='<div style="font-size:1.4rem;font-weight:900;color:var(--gold2);font-family:\'Cormorant Garamond\',serif;">R$ '+fm(ticketMedio)+'</div>';
+    metH+='<div style="font-size:.52rem;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-top:2px;">Ticket médio</div>';
+    metH+='</div>';
+    metH+='</div>';
+    fmet.innerHTML=metH;
+  }
+
+  // — Contratos vinculados (por cliente) —
   var fsrv=document.getElementById('finServicos');
   if(fsrv){
     var qs=DB.q||[];
-    // Agrupar por qid
     var grp={};
     DB.t.forEach(function(t){
       if(!t.qid)return;
@@ -77,8 +110,16 @@ function renderFin(){
     });
     var qids=Object.keys(grp);
     if(!qids.length){
-      fsrv.innerHTML='<div style="text-align:center;padding:14px 0 6px;font-size:.74rem;color:var(--t3);">Nenhum serviço vinculado ainda.<br><span style="font-size:.65rem;color:var(--t4);">No Histórico, toque 💰 para vincular.</span></div>';
+      fsrv.innerHTML='<div style="text-align:center;padding:18px 0 8px;"><div style="font-size:1.8rem;margin-bottom:8px;">📋</div><div style="font-size:.76rem;color:var(--t3);font-weight:600;">Nenhum contrato registrado</div><div style="font-size:.64rem;color:var(--t4);margin-top:4px;">Gere um contrato no Histórico para os valores aparecerem aqui.</div></div>';
     } else {
+      // ordenar: em andamento primeiro, depois fechados
+      qids.sort(function(a,b){
+        var qa=qs.find(function(x){return String(x.id)===String(a);})||{};
+        var qb=qs.find(function(x){return String(x.id)===String(b);})||{};
+        var sa=qa.status==='fechado'?1:0;
+        var sb=qb.status==='fechado'?1:0;
+        return sa-sb;
+      });
       var sh='';
       qids.forEach(function(qid){
         var q=qs.find(function(x){return String(x.id)===String(qid);})||{};
@@ -86,9 +127,10 @@ function renderFin(){
         var total=(q.vista||0)||(g.recebido+g.pendente);
         var pct=total>0?Math.min(100,Math.round((g.recebido/total)*100)):0;
         var fechado=q.status==='fechado';
-        var corStatus=fechado?'#4cda80':'var(--gold2)';
+        var corStatus=fechado?'#4cda80':'#C9A84C';
+        var bgStatus=fechado?'rgba(76,218,128,.1)':'rgba(201,168,76,.1)';
+        var bdStatus=fechado?'rgba(76,218,128,.25)':'rgba(201,168,76,.25)';
         var lblStatus=fechado?'✔ Fechado':'🔧 Em andamento';
-        // descrição do serviço
         var descSrv='';
         if(q.desc)descSrv=q.desc;
         else{
@@ -99,24 +141,44 @@ function renderFin(){
           if(q.acN&&q.acN.length)p.push(q.acN.slice(0,2).join(', '));
           descSrv=p.join(' · ');
         }
-        sh+='<div style="background:linear-gradient(135deg,var(--s2),rgba(22,22,30,1));border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:13px 14px;margin-bottom:9px;box-shadow:0 3px 16px rgba(0,0,0,.4);">';
-        // topo: nome + badge status
-        sh+='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px;">';
-        sh+='<div style="font-size:.84rem;font-weight:800;color:var(--tx);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(q.cli||'Cliente')+'</div>';
-        sh+='<span style="flex-shrink:0;margin-left:8px;font-size:.56rem;font-weight:700;color:'+corStatus+';background:rgba(0,0,0,.35);border:1px solid '+corStatus+';border-radius:10px;padding:2px 8px;white-space:nowrap;">'+lblStatus+'</span>';
+        var dataStr=q.dt?'<span style="font-size:.58rem;color:var(--t4);">'+fd(q.dt)+'</span>':'';
+        sh+='<div style="background:linear-gradient(135deg,rgba(28,28,38,1),rgba(18,18,26,1));border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:14px 15px;margin-bottom:10px;box-shadow:0 4px 20px rgba(0,0,0,.5);">';
+        // topo
+        sh+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">';
+        sh+='<div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">';
+        sh+='<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(145deg,rgba(201,168,76,.3),rgba(201,168,76,.08));border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;">🏠</div>';
+        sh+='<div style="min-width:0;">';
+        sh+='<div style="font-size:.82rem;font-weight:800;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(q.cli||'Cliente')+'</div>';
+        sh+=dataStr;
+        sh+='</div></div>';
+        sh+='<span style="flex-shrink:0;margin-left:8px;font-size:.55rem;font-weight:700;color:'+corStatus+';background:'+bgStatus+';border:1px solid '+bdStatus+';border-radius:10px;padding:3px 9px;white-space:nowrap;">'+lblStatus+'</span>';
         sh+='</div>';
         // descrição
-        if(descSrv)sh+='<div style="font-size:.68rem;color:var(--t3);margin-bottom:9px;line-height:1.55;">'+escH(descSrv)+'</div>';
+        if(descSrv)sh+='<div style="font-size:.67rem;color:var(--t3);margin-bottom:10px;line-height:1.55;padding-left:2px;">'+escH(descSrv)+'</div>';
+        // valores totais
+        sh+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">';
+        sh+='<div style="background:rgba(76,218,128,.07);border:1px solid rgba(76,218,128,.15);border-radius:10px;padding:8px 6px;text-align:center;">';
+        sh+='<div style="font-size:.44rem;letter-spacing:1px;text-transform:uppercase;color:rgba(76,218,128,.6);margin-bottom:3px;">Recebido</div>';
+        sh+='<div style="font-size:.78rem;font-weight:800;color:#4cda80;">R$ '+fm(g.recebido)+'</div>';
+        sh+='</div>';
+        sh+='<div style="background:rgba(122,176,222,.07);border:1px solid rgba(122,176,222,.15);border-radius:10px;padding:8px 6px;text-align:center;">';
+        sh+='<div style="font-size:.44rem;letter-spacing:1px;text-transform:uppercase;color:rgba(122,176,222,.6);margin-bottom:3px;">A Receber</div>';
+        sh+='<div style="font-size:.78rem;font-weight:800;color:#7ab0de;">R$ '+fm(g.pendente)+'</div>';
+        sh+='</div>';
+        sh+='<div style="background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.15);border-radius:10px;padding:8px 6px;text-align:center;">';
+        sh+='<div style="font-size:.44rem;letter-spacing:1px;text-transform:uppercase;color:rgba(201,168,76,.6);margin-bottom:3px;">Total</div>';
+        sh+='<div style="font-size:.78rem;font-weight:800;color:var(--gold2);">R$ '+fm(total)+'</div>';
+        sh+='</div>';
+        sh+='</div>';
         // barra de progresso
-        sh+='<div style="background:rgba(255,255,255,.07);border-radius:6px;height:4px;margin-bottom:7px;overflow:hidden;">';
-        sh+='<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#4cda80,#C9A84C);border-radius:6px;transition:width .5s ease;"></div>';
+        sh+='<div style="margin-bottom:5px;">';
+        sh+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+        sh+='<span style="font-size:.58rem;color:var(--t4);">Progresso do recebimento</span>';
+        sh+='<span style="font-size:.62rem;font-weight:700;color:'+(pct===100?'#4cda80':'var(--gold2)')+';">'+pct+'%</span>';
         sh+='</div>';
-        // valores linha
-        sh+='<div style="display:flex;justify-content:space-between;align-items:center;">';
-        sh+='<span style="font-size:.66rem;color:#4cda80;font-weight:700;">✔ R$ '+fm(g.recebido)+'</span>';
-        sh+='<span style="font-size:.6rem;color:var(--t4);">'+pct+'% recebido</span>';
-        sh+='<span style="font-size:.66rem;color:#7ab0de;">⏳ R$ '+fm(g.pendente)+'</span>';
-        sh+='</div>';
+        sh+='<div style="background:rgba(255,255,255,.07);border-radius:6px;height:5px;overflow:hidden;">';
+        sh+='<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#4cda80,#C9A84C);border-radius:6px;transition:width .6s ease;"></div>';
+        sh+='</div></div>';
         sh+='</div>';
       });
       fsrv.innerHTML=sh;
@@ -132,7 +194,6 @@ function renderFin(){
       var valStr=t.value?'R$ '+fm(t.value):'';
       var bg=t.type==='in'?'rgba(58,158,106,.06)':t.type==='out'?'rgba(201,68,68,.06)':t.type==='pend'?'rgba(74,128,181,.06)':'transparent';
       var bord=t.type==='in'?'rgba(76,218,128,.18)':t.type==='out'?'rgba(224,112,112,.18)':t.type==='pend'?'rgba(122,176,222,.18)':'rgba(255,255,255,.05)';
-      // descrição do orçamento vinculado
       var xDesc='';
       if(t.qid){
         var qr=(DB.q||[]).find(function(x){return String(x.id)===String(t.qid);});
@@ -159,10 +220,10 @@ function renderFin(){
   var tl=document.getElementById('trList');
   if(tl)tl.innerHTML=h;
 }
+
 function renderFixos(){
   var tot=0,h='';
   CFG.fixos.forEach(function(f){tot+=f.v;h+='<div class="rrow2" style="padding:9px 0;border-bottom:1px solid #0c0c10;display:flex;justify-content:space-between;"><span style="font-size:.79rem;color:var(--t3);">'+f.n+'</span><span style="font-size:.8rem;font-weight:600;">R$ '+fm(f.v)+'</span></div>';});
   h+='<div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0 0;margin-top:4px;border-top:1px solid var(--bd2);"><span style="font-size:.88rem;font-weight:700;">Total Mensal</span><span style="font-family:\'Cormorant Garamond\',serif;font-size:1.4rem;color:var(--gold2);font-weight:700;">R$ '+fm(tot)+'</span></div>';
   document.getElementById('fixosCard').innerHTML=h;
 }
-

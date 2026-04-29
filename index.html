@@ -234,17 +234,9 @@ function openApp(pg) {
           <div id="finBadges" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:9px;"></div>
         </div>
         <div id="finCards" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:13px 13px 4px;"></div>
-        <div style="padding:2px 13px 10px;">
-          <div style="font-size:.5rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--t4);font-weight:700;margin-bottom:7px;">Lançar</div>
-          <div class="qagrid" style="margin:0;">
-            <div class="qa" data-qa="in"><div class="qaI in">📈</div><div><div class="qanm">Entrada</div><div class="qasub">Recebido</div></div></div>
-            <div class="qa" data-qa="out"><div class="qaI out">📉</div><div><div class="qanm">Gasto</div><div class="qasub">Despesa</div></div></div>
-            <div class="qa" data-qa="note"><div class="qaI note">📝</div><div><div class="qanm">Nota</div><div class="qasub">Anotação</div></div></div>
-            <div class="qa" data-qa="pend"><div class="qaI pend">⏳</div><div><div class="qanm">A Receber</div><div class="qasub">Pendente</div></div></div>
-          </div>
-        </div>
-        <div style="padding:0 13px 4px;">
-          <div style="font-size:.5rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--t4);font-weight:700;margin-bottom:8px;">Serviços dos Clientes</div>
+        <div style="padding:4px 13px 0px;" id="finMetricas"></div>
+        <div style="padding:8px 13px 4px;">
+          <div style="font-size:.5rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--t4);font-weight:700;margin-bottom:8px;">Contratos</div>
           <div id="finServicos"></div>
         </div>
         <div class="sec mt"><div class="sl">Movimentações</div><div id="trList" style="padding:0 4px 4px;"></div></div>
@@ -413,12 +405,12 @@ function openApp(pg) {
         <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:#60a0e0;font-weight:700;margin-bottom:7px;">Observações</div>
         <textarea id="contrObs" rows="2" placeholder="Ex: Instalação inclusa, cliente retira lavatório antigo..." style="width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:9px;color:var(--tx);font-family:Outfit;font-size:.78rem;outline:none;resize:vertical;"></textarea>
       </div>
-      <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:11px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div id="contrFinChk" class="svchk on" onclick="this.classList.toggle('on')" style="cursor:pointer;width:20px;height:20px;">✓</div>
+      <div style="background:rgba(76,218,128,.07);border:1px solid rgba(76,218,128,.22);border-radius:10px;padding:11px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <div style="font-size:1.1rem;flex-shrink:0;margin-top:1px;">✅</div>
           <div>
-            <div style="font-size:.78rem;color:var(--gold2);font-weight:600;">Registrar entrada nas Finanças</div>
-            <div style="font-size:.62rem;color:var(--t3);margin-top:1px;">Valor de entrada lançado como receita pendente</div>
+            <div style="font-size:.78rem;color:#4cda80;font-weight:700;">Finanças atualizadas automaticamente</div>
+            <div style="font-size:.62rem;color:var(--t3);margin-top:3px;line-height:1.55;">Ao confirmar, a <strong style="color:var(--t2);">Entrada</strong> será registrada como receita recebida e o saldo <strong style="color:var(--t2);">A Receber</strong> como pendente — direto na aba Finanças.</div>
           </div>
         </div>
       </div>
