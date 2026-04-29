@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#C9A84C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HR Marmores">
+<meta name="description" content="Sistema de gestao HR Marmores e Granitos">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>HR Mármores e Granitos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+
+<script>
+// Minimal early bootstrap — precisa estar inline para funcionar antes do DOM
+window._pendingPg = null;
+function openApp(pg) {
+  var splash = document.getElementById('sSplash');
+  var app = document.getElementById('sApp');
+  if (splash) { splash.classList.remove('on'); splash.style.cssText = 'display:none!important'; }
+  if (app) { app.classList.add('on'); app.style.display = 'block'; }
+  window._pendingPg = pg;
+  if (typeof window.setLayout === 'function') {
+    window.setLayout();
+    if (typeof go === 'function') { go(pg); window._pendingPg = null; }
+  }
+}
+</script>
+</head>
+<body>
+<div id="shell">
+
+<!-- ══ SPLASH ══ -->
+<div class="scr on" id="sSplash">
+
+  <!-- Hero da empresa -->
+  <div class="sp-hero">
+    <div class="sp-logo" id="spLogo">HR</div>
+    <div class="sp-name" id="spName">HR Mármores e Granitos</div>
+    <div class="sp-tagline" id="spTagline">Marmoraria · Pilão Arcado — BA</div>
+    <div class="sp-rule"></div>
+    <div class="sp-info-row">
+      <div class="sp-info-item"><span class="sp-info-ic">📱</span><span class="sp-info-txt" id="spTel"></span></div>
+      <span class="sp-info-dot">·</span>
+      <div class="sp-info-item"><span class="sp-info-ic">📸</span><span class="sp-info-txt" id="spIg"></span></div>
+    </div>
+    <div class="sp-info-addr" id="spAddr"></div>
+    <div class="sp-info-cnpj" id="spCnpj"></div>
+  </div>
+
+  <!-- Ações principais -->
+  <div class="sp-actions">
+    <div class="sp-section-lbl">Acesso Rápido</div>
+    <div class="sp-grid-main">
+      <button class="sp-btn-main" onclick="openApp(0)">
+        <span class="sp-btn-ic">💰</span>
+        <div class="sp-btn-body">
+          <span class="sp-btn-nm">Novo Orçamento</span>
+          <span class="sp-btn-sm">Calcular e enviar</span>
+        </div>
+      </button>
+      <button class="sp-btn-main" onclick="openApp(7)">
+        <span class="sp-btn-ic">📋</span>
+        <div class="sp-btn-body">
+          <span class="sp-btn-nm">Histórico</span>
+          <span class="sp-btn-sm">Orçamentos salvos</span>
+        </div>
+      </button>
+      <button class="sp-btn-main" onclick="openApp(3)">
+        <span class="sp-btn-ic">📅</span>
+        <div class="sp-btn-body">
+          <span class="sp-btn-nm">Agenda</span>
+          <span class="sp-btn-sm">Serviços e entregas</span>
+        </div>
+      </button>
+      <button class="sp-btn-main" onclick="openApp(4)">
+        <span class="sp-btn-ic">💵</span>
+        <div class="sp-btn-body">
+          <span class="sp-btn-nm">Finanças</span>
+          <span class="sp-btn-sm">Entradas e gastos</span>
+        </div>
+      </button>
+    </div>
+    <div class="sp-section-lbl" style="margin-top:12px;">Catálogos</div>
+    <div class="sp-grid-cats">
+      <button class="sp-btn-cat" onclick="openApp(1)">
+        <span class="sp-btn-ic">🪨</span><span class="sp-btn-nm">Pedras</span>
+      </button>
+      <button class="sp-btn-cat" onclick="openApp(2)">
+        <span class="sp-btn-ic">🚰</span><span class="sp-btn-nm">Cubas</span>
+      </button>
+      <button class="sp-btn-cat" onclick="openApp(8)">
+        <span class="sp-btn-ic">🔩</span><span class="sp-btn-nm">Acessórios</span>
+      </button>
+      <button class="sp-btn-cat" onclick="openApp(5)">
+        <span class="sp-btn-ic">🏢</span><span class="sp-btn-nm">Empresa</span>
+      </button>
+    </div>
+    <button id="btnInstalarPWA" onclick="pwaInstalar()">
+      <span class="install-ic">📲</span>
+      <div class="install-body">
+        <span class="install-nm">Instalar App</span>
+        <span class="install-sm">Adicionar à tela inicial</span>
+      </div>
+    </button>
+  </div>
+
+</div><!-- /sSplash -->
+
+<!-- ══ APP ══ -->
+<div class="scr" id="sApp">
+  <div id="hdrAndPages">
+
+    <!-- Header -->
+    <div id="hdr">
+      <div class="hlogo" onclick="location.reload()">HR</div>
+      <div class="hnm">HR Mármores e Granitos <span class="hsub">& GRANITOS · PILÃO ARCADO</span></div>
+      <span class="hdt" id="hdrDate"></span>
+    </div>
+
+    <!-- Pages -->
+    <div id="pages">
+
+      <!-- 0: ORÇAMENTO -->
+      <div class="pg on" id="pg0">
+        <div class="hero"><div class="htitle">Orçamento</div><div class="hsub2">Calcule e envie em segundos</div></div>
+        <div class="sec">
+          <div class="sl">Cliente</div>
+          <div class="card">
+            <div class="r2">
+              <div class="f"><label>Nome</label><input id="oCliente" type="text" placeholder="Nome do cliente"></div>
+              <div class="f"><label>WhatsApp</label><input id="oTel" type="text" placeholder="(xx) 9xxxx-xxxx"></div>
+            </div>
+            <div class="r2">
+              <div class="f"><label>Cidade</label><input id="oCidade" type="text" placeholder="Pilão Arcado"></div>
+              <div class="f"><label>Endereço</label><input id="oEnd" type="text" placeholder="Rua, nº"></div>
+            </div>
+            <div class="f"><label>Obs.</label><input id="oObs" type="text" placeholder="Observações (opcional)"></div>
+          </div>
+        </div>
+        <div class="sec">
+          <div class="sl">Material</div>
+          <div id="matScroll"></div>
+        </div>
+        <div id="ambientesWrap"></div>
+        <div class="sec">
+          <button class="btn btn-o mt6" id="btnAddAmb" style="font-size:.78rem;padding:10px;width:100%;">+ Adicionar Ambiente</button>
+        </div>
+        <div class="sec">
+          <div class="sl">IA</div>
+          <button class="btn btn-ai mt6" id="btnAI" style="width:100%;padding:11px;font-size:.82rem;">✨ Descrever com IA</button>
+        </div>
+        <div class="sec mt">
+          <div class="sl">Resultado</div>
+          <div class="card" id="resultCard" style="display:none;">
+            <div id="resultRows"></div>
+            <div class="rtot"><span class="k">À Vista</span><span class="v" id="rVista">R$ 0,00</span></div>
+            <div class="rtot" style="padding-top:6px;border-top:none;"><span class="k" style="font-size:.75rem;color:var(--t3);">Parcelado 8× +12%</span><span class="v" style="font-size:1.1rem;" id="rParc">R$ 0,00</span></div>
+          </div>
+        </div>
+        <div class="sec mt" style="padding-bottom:4px;">
+          <button class="btn btn-g mt" id="btnCalc">Calcular Orçamento</button>
+        </div>
+        <div id="quotebox" style="display:none;padding:0 17px 8px;">
+          <div class="qbox" id="quotetext"></div>
+          <div class="row mt6"><button class="btn btn-g" id="btnCopy" style="flex:1;">📋 Copiar</button><button class="btn btn-o" id="btnPDF" style="flex:1;">📄 PDF</button></div>
+          <button class="btn btn-o mt" id="btnSaveAg">📅 Salvar na Agenda</button>
+        </div>
+        <div style="height:22px;"></div>
+      </div>
+
+      <!-- 1: PEDRAS -->
+      <div class="pg" id="pg1">
+        <div class="cathdr"><div class="htitle">Catálogo de Pedras</div><div class="hsub2">Preços por m²</div></div>
+        <div class="fbar" id="fbar"></div>
+        <div id="catGrid"></div>
+        <div style="height:14px;"></div>
+      </div>
+
+      <!-- 2: CUBAS -->
+      <div class="pg" id="pg2">
+        <div class="cubahdr"><div class="htitle">Catálogo de Cubas</div><div class="hsub2">Nossos modelos · Preços com instalação</div></div>
+        <div class="cuba-tabs" id="cubaTabs">
+          <div class="ct on" data-ccat="coz">🍳 Cozinha</div>
+          <div class="ct" data-ccat="lav">🚿 Banhe./Lavabo</div>
+        </div>
+        <div id="cubaListWrap"></div>
+        <div style="height:14px;"></div>
+      </div>
+
+      <!-- 2b: HISTÓRICO (pg7 via nav) -->
+      <div class="pg" id="pg2b" style="display:none;">
+        <div class="hero" style="padding-bottom:12px;">
+          <div class="htitle">📋 Orçamentos</div>
+          <div class="hsub2">Histórico · Pesquisa · Reaproveitamento</div>
+        </div>
+        <div class="orc-search">
+          <span style="font-size:1rem;color:var(--t4);">🔍</span>
+          <input id="orcSearch" placeholder="Buscar por nome do cliente..." type="text" oninput="filterOrc()">
+          <button onclick="document.getElementById('orcSearch').value='';filterOrc();" style="background:none;border:none;color:var(--t4);font-size:.8rem;cursor:pointer;padding:0;">✕</button>
+        </div>
+        <div class="orc-summary" id="orcSummary"></div>
+        <div id="orcList" style="padding-bottom:20px;"></div>
+      </div>
+
+      <!-- 8: ACESSÓRIOS -->
+      <div class="pg" id="pg8">
+        <div class="cubahdr"><div class="htitle">Catálogo de Acessórios</div><div class="hsub2">Dispensers, calhas, escorredores e mais</div></div>
+        <div id="acListWrap"></div>
+        <div style="height:14px;"></div>
+      </div>
+
+      <!-- 3: AGENDA -->
+      <div class="pg" id="pg3">
+        <div class="hero"><div class="htitle">Agenda</div><div class="hsub2">Serviços e entregas</div></div>
+        <div class="sec">
+          <button class="btn btn-o mt6" id="btnNewJob" style="font-size:.78rem;padding:10px;">+ Novo Serviço</button>
+          <div class="mt" id="agList"></div>
+        </div>
+        <div style="height:14px;"></div>
+      </div>
+
+      <!-- 4: FINANÇAS -->
+      <div class="pg" id="pg4">
+        <div class="finhero" style="position:relative;overflow:hidden;">
+          <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 25% 60%,rgba(201,168,76,.08) 0%,transparent 65%);pointer-events:none;"></div>
+          <div class="finlbl">Saldo Atual</div>
+          <div class="finval pos" id="finSaldo">R$ 0,00</div>
+          <div class="finsub" id="finSub">Nenhuma movimentação</div>
+          <div id="finBadges" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:9px;"></div>
+        </div>
+        <div id="finCards" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:13px 13px 4px;"></div>
+        <div style="padding:2px 13px 10px;">
+          <div style="font-size:.5rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--t4);font-weight:700;margin-bottom:7px;">Lançar</div>
+          <div class="qagrid" style="margin:0;">
+            <div class="qa" data-qa="in"><div class="qaI in">📈</div><div><div class="qanm">Entrada</div><div class="qasub">Recebido</div></div></div>
+            <div class="qa" data-qa="out"><div class="qaI out">📉</div><div><div class="qanm">Gasto</div><div class="qasub">Despesa</div></div></div>
+            <div class="qa" data-qa="note"><div class="qaI note">📝</div><div><div class="qanm">Nota</div><div class="qasub">Anotação</div></div></div>
+            <div class="qa" data-qa="pend"><div class="qaI pend">⏳</div><div><div class="qanm">A Receber</div><div class="qasub">Pendente</div></div></div>
+          </div>
+        </div>
+        <div style="padding:0 13px 4px;">
+          <div style="font-size:.5rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--t4);font-weight:700;margin-bottom:8px;">Serviços dos Clientes</div>
+          <div id="finServicos"></div>
+        </div>
+        <div class="sec mt"><div class="sl">Movimentações</div><div id="trList" style="padding:0 4px 4px;"></div></div>
+        <div class="sec mt" style="padding-bottom:80px;"><div class="sl">Custos Fixos</div><div class="card" id="fixosCard"></div></div>
+      </div>
+
+      <!-- 5: EMPRESA -->
+      <div class="pg" id="pg5">
+        <div class="empcov"><div class="epat"></div><div class="eglow"></div><div class="econtent"><div class="elogo">HR</div><div class="enm">HR Mármores e Granitos</div><div class="ecnpj">CNPJ 64.639.182/0001-28 · Pilão Arcado — BA</div></div></div>
+        <div class="estats" id="empStats"></div>
+        <div class="sec mt"><div class="sl">Contato</div><div class="inflist" id="infoList"></div></div>
+        <div class="sec mt"><div class="sl">Regras Comerciais</div>
+          <div class="rcard">
+            <div class="rrow2"><span class="rk2">Pagamento</span><span class="rv2">50% entrada + 50% entrega</span></div>
+            <div class="rrow2"><span class="rk2">Parcelamento</span><span class="rv2">+12% em até 8×</span></div>
+            <div class="rrow2"><span class="rk2">Desconto</span><span class="rv2">Somente na pedra</span></div>
+            <div class="rrow2"><span class="rk2">Validade</span><span class="rv2">7 dias</span></div>
+          </div>
+        </div>
+        <div class="sec mt" style="padding-bottom:18px;"><div class="sl">Tabela de Preços</div><div class="ptwrap" id="ptWrap"></div></div>
+      </div>
+
+      <!-- 6: CONFIG -->
+      <div class="pg" id="pg6" style="display:none;flex-direction:column;">
+        <div class="hero" style="flex-shrink:0;"><div class="htitle">⚙️ Configurações</div><div class="hsub2">Edite pedras, cubas, preços e empresa</div></div>
+        <div class="cfgtabs" id="cfgTabs">
+          <div class="cfgtab on" data-cftab="0">🪨 Pedras</div>
+          <div class="cfgtab" data-cftab="1">🔧 Cubas Coz</div>
+          <div class="cfgtab" data-cftab="2">🚿 Cubas Ban</div>
+          <div class="cfgtab" data-cftab="6">🔩 Acessórios</div>
+          <div class="cfgtab" data-cftab="5">📷 Catálogo</div>
+          <div class="cfgtab" data-cftab="3">⚙️ Serviços</div>
+          <div class="cfgtab" data-cftab="4">🏢 Empresa</div>
+        </div>
+        <div class="cfgbody" id="cfgBody"></div>
+      </div>
+
+    </div><!-- /pages -->
+  </div><!-- /hdrAndPages -->
+
+  <!-- Nav Bar -->
+  <div id="nav">
+    <div class="ni on" data-pg="0"><span class="ni-i">💰</span><span class="ni-l">Orçamento</span></div>
+    <div class="ni" data-pg="1"><span class="ni-i">🪨</span><span class="ni-l">Pedras</span></div>
+    <div class="ni" data-pg="2"><span class="ni-i">🚰</span><span class="ni-l">Cubas</span></div>
+    <div class="ni" data-pg="7"><span class="ni-i">📋</span><span class="ni-l">Histórico</span></div>
+    <div class="ni" data-pg="8"><span class="ni-i">🔩</span><span class="ni-l">Acessórios</span></div>
+    <div class="ni" data-pg="3"><span class="ni-i">📅</span><span class="ni-l">Agenda</span><span class="ndot" id="urgDot"></span></div>
+    <div class="ni" data-pg="4"><span class="ni-i">💵</span><span class="ni-l">Finanças</span></div>
+    <div class="ni" data-pg="5"><span class="ni-i">🏢</span><span class="ni-l">Empresa</span></div>
+    <div class="ni" data-pg="6"><span class="ni-i">⚙️</span><span class="ni-l">Config</span></div>
+  </div>
+
+</div><!-- /sApp -->
+
+<!-- ══ MODALS ══ -->
+<div class="ov" id="stoneMd"><div class="modal"><div id="stoneMdC"></div><button class="btn btn-o mt" data-close>Fechar</button></div></div>
+<div class="ov" id="cubaPickMd"><div class="modal"><div class="mtitle" id="cpTitle">Escolher Cuba</div><div style="font-size:.75rem;color:var(--t3);margin-bottom:12px;" id="cpSub"></div><div id="cpList"></div><button class="btn btn-o mt" data-close>Fechar</button></div></div>
+<div class="ov" id="diasMd"><div class="modal"><div class="mtitle">📅 Definir Entrega</div><p style="font-size:.78rem;color:var(--t3);margin-bottom:12px;line-height:1.6;" id="diasMsg"></p><div class="f"><label>Dias para entregar</label><input id="diasIn" type="number" placeholder="Ex: 7" min="1"></div><div class="dp" id="diasPrev"></div><button class="btn btn-g" id="btnConfAg" style="margin-bottom:7px;">Confirmar</button><button class="btn btn-o" data-close>Cancelar</button></div></div>
+<div class="ov" id="jobMd"><div class="modal"><div class="mtitle" id="jobMdTitle">Serviço</div><div class="f"><label>Cliente</label><input id="jCli" type="text"></div><div class="f"><label>Descrição</label><input id="jDesc" type="text" placeholder="Ex: Cozinha granito preto"></div><div class="r2"><div class="f"><label>Início</label><input id="jStart" type="date"></div><div class="f"><label>Dias p/ entrega</label><input id="jDias" type="number" placeholder="7"></div></div><div class="dp" id="jobDp"></div><div class="r2"><div class="f"><label>Valor Total R$</label><input id="jVal" type="number"></div><div class="f"><label>Entrada Paga R$</label><input id="jPago" type="number"></div></div><div class="f"><label>Obs.</label><textarea id="jObs" rows="2" placeholder="Endereço, detalhes..."></textarea></div><button class="btn btn-g" id="btnSvJob" style="margin-bottom:7px;">Salvar</button><button class="btn btn-o" data-close>Cancelar</button></div></div>
+<div class="ov" id="finMd"><div class="modal"><div class="mtitle">Lançar</div><div class="tsrow" id="tsel"><div class="ts on" data-ftp="in">Entrada</div><div class="ts" data-ftp="out">Gasto</div><div class="ts" data-ftp="note">Nota</div><div class="ts" data-ftp="pend">A receber</div></div><div class="f"><label>Descrição</label><input id="fDesc" type="text"></div><div class="r2"><div class="f"><label>Valor R$</label><input id="fVal" type="number"></div><div class="f"><label>Data</label><input id="fData" type="date"></div></div><button class="btn btn-g" id="btnSvFin" onclick="saveFin()" style="margin-bottom:7px;">Salvar</button><button class="btn btn-o" data-close>Cancelar</button></div></div>
+<div class="ov" id="trEdMd"><div class="modal"><div class="mtitle">Editar Lançamento</div><div class="tsrow" id="tesel"><div class="ts on" data-tet="in">Entrada</div><div class="ts" data-tet="out">Gasto</div><div class="ts" data-tet="note">Nota</div><div class="ts" data-tet="pend">A receber</div></div><div class="f"><label>Descrição</label><input id="teDesc" type="text"></div><div class="r2"><div class="f"><label>Valor R$</label><input id="teVal" type="number"></div><div class="f"><label>Data</label><input id="teData" type="date"></div></div><button class="btn btn-g" id="btnSvTrEd" style="margin-bottom:7px;">Salvar</button><button class="btn btn-red mt6" id="btnDelTr">Excluir Lançamento</button><button class="btn btn-o mt6" data-close>Cancelar</button></div></div>
+
+<!-- Cuba Fullscreen -->
+<div id="cubaFsMd">
+  <button id="cubaFsClose" onclick="document.getElementById('cubaFsMd').classList.remove('on')">✕</button>
+  <img id="cubaFsImg" src="" alt="">
+  <div id="cubaFsCaption">
+    <div class="fn" id="cubaFsNm"></div>
+    <div class="fd" id="cubaFsDim"></div>
+    <div class="fp" id="cubaFsPr"></div>
+  </div>
+</div>
+
+<input type="file" id="fileInp" class="finp" accept="image/*">
+
+<!-- Modal IA -->
+<div class="ov" id="aiMd">
+  <div class="modal" style="padding-bottom:36px;">
+    <div class="mtitle">✨ Descrever Projeto</div>
+    <p style="font-size:.76rem;color:var(--t3);line-height:1.65;margin-bottom:13px;">
+      Descreva o projeto em linguagem natural. O Claude identifica as peças, medidas, sainha, frontão, furos e serviços automaticamente.
+    </p>
+    <div style="font-size:.62rem;color:var(--t4);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Exemplos:</div>
+    <div style="background:var(--s3);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.73rem;color:var(--t2);line-height:1.75;">
+      <span style="color:var(--gold);">→</span> "bancada em L: 350×60cm e 120×60cm, sainha reta nos dois lados, frontão 120×30cm, furo torneira e furo ralo, instalação padrão"<br>
+      <span style="color:var(--gold);">→</span> "bancada 280×60, sainha boleada, rebaixo normal, cuba inox, cantoneira"<br>
+      <span style="color:var(--gold);">→</span> "peitoril 3 janelas de 140cm cada, 2 lados acabamento, instalação padrão"
+    </div>
+    <div class="f">
+      <label>Descreva o projeto</label>
+      <textarea id="aiDesc" rows="5" placeholder="Ex: bancada em L com 350x60cm na parte longa e 120x60cm na parte curta. Sainha reta nos dois lados com 6cm de altura. Frontão de 120x30cm. Furo de torneira, rebaixo normal para cuba, cantoneira e instalação padrão..." style="font-size:.83rem;line-height:1.6;"></textarea>
+    </div>
+    <div id="aiStatus" class="ai-status"></div>
+    <div id="aiResultBox" class="ai-result">
+      <div class="ai-result-title">Itens identificados — marque os que quer adicionar</div>
+      <div id="aiResultList"></div>
+    </div>
+    <button class="btn btn-ai" id="btnAIEnviar" style="width:100%;padding:13px;font-size:.86rem;margin-bottom:9px;">✨ Interpretar com ChatGPT</button>
+    <button class="btn btn-g" id="btnAIAplicar" style="display:none;margin-bottom:9px;">✓ Aplicar no Orçamento</button>
+    <button class="btn btn-o" data-close>Cancelar</button>
+  </div>
+</div>
+
+<!-- Modal Contrato -->
+<div class="ov" id="contrMd" onclick="if(event.target===this)closeAll()">
+  <div class="modal" style="max-width:500px;padding:0;overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#0a1520,#0d2035);padding:16px 18px;border-bottom:1px solid #1a4070;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:#60a0e0;font-weight:700;">📜 Configurar Contrato</div>
+      <div style="font-size:.65rem;color:rgba(96,160,224,.5);margin-top:2px;">Defina os termos antes de gerar</div>
+    </div>
+    <div style="padding:16px 18px;display:flex;flex-direction:column;gap:13px;max-height:75vh;overflow-y:auto;">
+      <div>
+        <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:#60a0e0;font-weight:700;margin-bottom:7px;">Forma de Pagamento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;" id="contrPgBtns">
+          <button class="contr-pg-btn on" data-pg="50_50" onclick="selContrPg('50_50')">50%+50%</button>
+          <button class="contr-pg-btn" data-pg="30_70" onclick="selContrPg('30_70')">30%+70%</button>
+          <button class="contr-pg-btn" data-pg="40_60" onclick="selContrPg('40_60')">40%+60%</button>
+          <button class="contr-pg-btn" data-pg="60_40" onclick="selContrPg('60_40')">60%+40%</button>
+          <button class="contr-pg-btn" data-pg="3x" onclick="selContrPg('3x')">3× iguais</button>
+          <button class="contr-pg-btn" data-pg="vista" onclick="selContrPg('vista')">À vista</button>
+          <button class="contr-pg-btn" data-pg="personalizado" onclick="selContrPg('personalizado')" style="grid-column:span 3;">✏️ Personalizado</button>
+        </div>
+        <div id="contrPgCustom" style="display:none;margin-top:8px;background:var(--s3);border-radius:10px;padding:10px;gap:8px;flex-direction:column;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div><div style="font-size:.58rem;color:var(--t3);margin-bottom:4px;">Entrada (%)</div>
+            <input type="number" id="contrEntPct" min="0" max="100" value="50" style="width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:8px;color:var(--tx);font-family:Outfit;font-size:.85rem;outline:none;"></div>
+            <div><div style="font-size:.58rem;color:var(--t3);margin-bottom:4px;">Entrega (%)</div>
+            <input type="number" id="contrEntgPct" min="0" max="100" value="50" style="width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:8px;color:var(--tx);font-family:Outfit;font-size:.85rem;outline:none;"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:#60a0e0;font-weight:700;margin-bottom:7px;">Parcelamento no Cartão</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="contrParc" style="flex:1;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:9px;color:var(--tx);font-family:Outfit;font-size:.8rem;outline:none;">
+            <option value="0">Sem parcelamento</option>
+            <option value="2">2×</option><option value="3">3×</option>
+            <option value="4">4×</option><option value="5">5×</option>
+            <option value="6">6×</option><option value="8" selected>8×</option>
+            <option value="10">10×</option><option value="12">12×</option>
+          </select>
+          <div><div style="font-size:.58rem;color:var(--t3);margin-bottom:3px;">Taxa (%)</div>
+          <input type="number" id="contrTaxa" value="12" min="0" max="50" step="0.5" style="width:65px;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:8px;color:var(--tx);font-family:Outfit;font-size:.8rem;outline:none;"></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:#60a0e0;font-weight:700;margin-bottom:7px;">Prazo e Datas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div><div style="font-size:.58rem;color:var(--t3);margin-bottom:4px;">Data de início</div>
+          <input type="date" id="contrDataInicio" onchange="contrCalcEntrega()" style="width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:8px;color:var(--tx);font-family:Outfit;font-size:.78rem;outline:none;"></div>
+          <div><div style="font-size:.58rem;color:var(--t3);margin-bottom:4px;">Dias úteis</div>
+          <input type="number" id="contrPrazo" value="15" min="1" oninput="contrCalcEntrega()" style="width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:8px;color:var(--tx);font-family:Outfit;font-size:.85rem;outline:none;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div><div style="font-size:.58rem;color:var(--t3);margin-bottom:4px;">Previsão de entrega</div>
+          <input type="date" id="contrDataEntrega" readonly style="width:100%;background:var(--s3);border:1px solid var(--bd);border-radius:8px;padding:8px;color:var(--t2);font-family:Outfit;font-size:.78rem;outline:none;"></div>
+          <div><div style="font-size:.58rem;color:var(--t3);margin-bottom:4px;">Validade orçamento</div>
+          <select id="contrValid" style="width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:8px;color:var(--tx);font-family:Outfit;font-size:.8rem;outline:none;">
+            <option value="7">7 dias</option><option value="15">15 dias</option><option value="30">30 dias</option>
+          </select></div>
+        </div>
+        <div id="contrAgendaInfo" style="display:none;margin-top:8px;background:rgba(96,160,224,.08);border:1px solid rgba(96,160,224,.2);border-radius:8px;padding:8px 10px;font-size:.68rem;color:#60a0e0;"></div>
+      </div>
+      <div>
+        <div style="font-size:.55rem;letter-spacing:2px;text-transform:uppercase;color:#60a0e0;font-weight:700;margin-bottom:7px;">Observações</div>
+        <textarea id="contrObs" rows="2" placeholder="Ex: Instalação inclusa, cliente retira lavatório antigo..." style="width:100%;background:var(--s2);border:1px solid var(--bd2);border-radius:8px;padding:9px;color:var(--tx);font-family:Outfit;font-size:.78rem;outline:none;resize:vertical;"></textarea>
+      </div>
+      <div style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:11px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div id="contrFinChk" class="svchk on" onclick="this.classList.toggle('on')" style="cursor:pointer;width:20px;height:20px;">✓</div>
+          <div>
+            <div style="font-size:.78rem;color:var(--gold2);font-weight:600;">Registrar entrada nas Finanças</div>
+            <div style="font-size:.62rem;color:var(--t3);margin-top:1px;">Valor de entrada lançado como receita pendente</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="closeAll()" style="flex:1;padding:12px;">Cancelar</button>
+        <button class="btn btn-contrato" onclick="confirmarContrato()" style="flex:2;padding:12px;font-size:.83rem;">📜 Gerar Contrato</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div><!-- /shell -->
+
+<!-- Modal Admin PIN -->
+<div class="ov" id="adminPinMd" style="align-items:flex-end;">
+  <div style="background:var(--s2);border-top:1px solid var(--bd);border-radius:20px 20px 0 0;width:100%;max-width:460px;padding:22px 22px 40px;animation:slideUp .3s ease;">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:1.1rem;font-weight:700;color:var(--gold2);margin-bottom:3px;">Acesso Proprietario</div>
+      <div style="font-size:.72rem;color:var(--t3);">Digite a senha (padrao: 1818)</div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-bottom:18px;">
+      <div id="ad0" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--bd2);transition:.15s;"></div>
+      <div id="ad1" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--bd2);transition:.15s;"></div>
+      <div id="ad2" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--bd2);transition:.15s;"></div>
+      <div id="ad3" style="width:14px;height:14px;border-radius:50%;border:2px solid var(--bd2);transition:.15s;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px;margin:0 auto 10px;">
+      <button onclick="adPin('1')" class="pin-key">1</button>
+      <button onclick="adPin('2')" class="pin-key">2</button>
+      <button onclick="adPin('3')" class="pin-key">3</button>
+      <button onclick="adPin('4')" class="pin-key">4</button>
+      <button onclick="adPin('5')" class="pin-key">5</button>
+      <button onclick="adPin('6')" class="pin-key">6</button>
+      <button onclick="adPin('7')" class="pin-key">7</button>
+      <button onclick="adPin('8')" class="pin-key">8</button>
+      <button onclick="adPin('9')" class="pin-key">9</button>
+      <button onclick="closeAll()" class="pin-key" style="color:var(--t3);font-size:.68rem;">Cancelar</button>
+      <button onclick="adPin('0')" class="pin-key">0</button>
+      <button onclick="adPinDel()" class="pin-key" style="color:var(--red);">Del</button>
+    </div>
+    <div id="adMsg" style="text-align:center;color:var(--red);font-size:.72rem;min-height:18px;font-weight:600;"></div>
+  </div>
+</div>
+
+<!-- ══ SCRIPTS — ordem importa ══ -->
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/orcamento.js"></script>
+<script src="js/pdf-agenda.js"></script>
+<script src="js/financas.js"></script>
+<script src="js/catalogos.js"></script>
+<script src="js/historico.js"></script>
+<script src="js/contrato.js"></script>
+<script src="js/pwa.js"></script>
+
+</body>
+</html>
