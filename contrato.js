@@ -56,7 +56,8 @@ function contrCalcEntrega(){
 
 function confirmarContrato(){
   try{
-  var id=_contrId;closeAll();
+  // Ler TODOS os valores ANTES de fechar o modal
+  var id=_contrId;
   var q=DB.q.find(function(x){return x.id==id;});
   if(!q){toast('Orçamento não encontrado');return;}
   var pgBtn=document.querySelector('.contr-pg-btn.on');
@@ -68,14 +69,25 @@ function confirmarContrato(){
   var obsContr=document.getElementById('contrObs').value.trim();
   var dataInicio=document.getElementById('contrDataInicio').value||'';
   var dataEntrega=document.getElementById('contrDataEntrega').value||'';
-  var vista=q.vista||0;
-  var pgConds=[];
   var entPct=50,entgPct=50;
   var pgMap={'50_50':[50,50],'vista':[100,0],'30_70':[30,70],'40_60':[40,60],'60_40':[60,40],'3x':[33,67]};
   if(pgMap[pgTipo]){entPct=pgMap[pgTipo][0];entgPct=pgMap[pgTipo][1];}
-  else if(pgTipo==='personalizado'){entPct=+document.getElementById('contrEntPct').value||50;entgPct=+document.getElementById('contrEntgPct').value||50;}
+  else if(pgTipo==='personalizado'){
+    entPct=+document.getElementById('contrEntPct').value||50;
+    entgPct=+document.getElementById('contrEntgPct').value||50;
+  }
+  // Agora fecha o modal com segurança
+  closeAll();
+
+  var vista=q.vista||0;
+  var pgConds=[];
   var entVal=vista*(entPct/100);
   var entgVal=vista*(entgPct/100);
+
+  // Peitoril e Soleira: recebimento só na entrega (100% pend)
+  var tipoLower=(q.tipo||'').toLowerCase();
+  var ehEntregaTotal=tipoLower.indexOf('peitoril')>=0||tipoLower.indexOf('soleira')>=0;
+
   if(entPct>0)pgConds.push({icon:'💰',txt:'<strong>Entrada ('+entPct+'%):</strong> R$ '+fm(entVal)+' no ato da assinatura'});
   if(entgPct>0&&pgTipo!=='3x')pgConds.push({icon:'💰',txt:'<strong>Entrega ('+entgPct+'%):</strong> R$ '+fm(entgVal)+' na entrega e instalação'});
   if(pgTipo==='3x'){var v3=vista/3;pgConds.push({icon:'💰',txt:'<strong>1ª:</strong> R$ '+fm(v3)+' na assinatura'},{icon:'💰',txt:'<strong>2ª:</strong> R$ '+fm(v3)+' na metade'},{icon:'💰',txt:'<strong>3ª:</strong> R$ '+fm(v3)+' na entrega'});}
@@ -84,19 +96,28 @@ function confirmarContrato(){
   if(dataInicio){var di=new Date(dataInicio+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});pgConds.push({icon:'🔨',txt:'<strong>Início:</strong> '+di});}
   if(dataEntrega){var de=new Date(dataEntrega+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});pgConds.push({icon:'🚚',txt:'<strong>Previsão de entrega:</strong> '+de+' ('+prazo+' dias úteis)'});}
   if(obsContr)pgConds.push({icon:'📝',txt:obsContr});
-  if(entVal>0){
-    if(!DB.j)DB.j=[];
-    if(!DB.t)DB.t=[];
-    var _td=(q.tipo||'Serviço')+(q.mat?' · '+q.mat:'');
-    if(!DB.t.some(function(t){return t.qid==q.id;})){
-      DB.t.unshift({id:Date.now(),type:'in',desc:'Entrada '+entPct+'% — '+escH(q.cli||'Cliente')+' ('+_td+')',value:entVal,date:new Date().toISOString().slice(0,10),qid:q.id});
+
+  if(!DB.j)DB.j=[];
+  if(!DB.t)DB.t=[];
+  var _td=(q.tipo||'Serviço')+(q.mat?' · '+q.mat:'');
+  if(!DB.t.some(function(t){return t.qid==q.id;})){
+    if(ehEntregaTotal){
+      // Peitoril/Soleira: tudo a receber na entrega
+      DB.t.unshift({id:Date.now(),type:'pend',desc:'A receber 100% na entrega — '+escH(q.cli||'Cliente')+' ('+_td+')',value:vista,date:dataEntrega||new Date().toISOString().slice(0,10),qid:q.id});
+      toast('⏳ Peitoril/Soleira: R$ '+fm(vista)+' registrado como a receber na entrega');
+    } else {
+      if(entVal>0)DB.t.unshift({id:Date.now(),type:'in',desc:'Entrada '+entPct+'% — '+escH(q.cli||'Cliente')+' ('+_td+')',value:entVal,date:new Date().toISOString().slice(0,10),qid:q.id});
       if(entgVal>0)DB.t.unshift({id:Date.now()+1,type:'pend',desc:'A receber '+entgPct+'% — '+escH(q.cli||'Cliente')+' ('+_td+')',value:entgVal,date:dataEntrega||new Date().toISOString().slice(0,10),qid:q.id});
+      if(entVal>0)toast('💰 Finanças atualizadas! Entrada R$ '+fm(entVal));
     }
+  }
+  if(!ehEntregaTotal&&entVal>0){
     DB.j.push({id:Date.now()+2,tipo:'r',desc:'Entrada — '+escH(q.cli||'Cliente')+' ('+q.tipo+')',val:entVal,dt:new Date().toISOString().slice(0,10),status:'pendente',qid:q.id});
     if(entgVal>0)DB.j.push({id:Date.now()+3,tipo:'r',desc:'Entrega — '+escH(q.cli||'Cliente')+' ('+q.tipo+')',val:entgVal,dt:dataEntrega||new Date().toISOString().slice(0,10),status:'pendente',qid:q.id});
-    DB.sv(); renderFin();
-    toast('💰 Finanças atualizadas! Entrada R$ '+fm(entVal));
+  } else if(ehEntregaTotal){
+    DB.j.push({id:Date.now()+4,tipo:'r',desc:'Entrega — '+escH(q.cli||'Cliente')+' ('+q.tipo+')',val:vista,dt:dataEntrega||new Date().toISOString().slice(0,10),status:'pendente',qid:q.id});
   }
+  DB.sv(); renderFin();
   _gerarContratoHtml(q,pgConds,prazo,valid,parc,taxa);
   }catch(err){console.error('confirmarContrato:',err);toast('Erro: '+err.message);}
 }
